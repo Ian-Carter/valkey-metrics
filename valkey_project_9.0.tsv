@@ -1,0 +1,101 @@
+Title	URL	Assignees	Status	Need By
+Introduce mechanism to block atomic slot migration when a module does not support it	https://github.com/valkey-io/valkey/issues/2579		Done	GA
+Add SAFE option to SHUTDOWN to reject shutdown in unsafe situations	https://github.com/valkey-io/valkey/pull/2195		Done	rc1
+Include command fullname in error message when returning NO_MULTI error	https://github.com/valkey-io/valkey/pull/2286		Done	rc1
+Fixed CROSSSLOT ERROR in Cluster Mode for PUBSUB SHARDNUMSUB	https://github.com/valkey-io/valkey/pull/1369		In Progress	GA
+RESP3 PUSH support for MONITOR command	https://github.com/valkey-io/valkey/pull/1426		Todo	Optional
+Enable dual-channel replication by default in valkey 9	https://github.com/valkey-io/valkey/issues/2083		Todo	Optional
+Move auth check to the front, before command exist/arity/protected check	https://github.com/valkey-io/valkey/pull/1475		Done	
+Automatically test a random DB for clustering tests	https://github.com/valkey-io/valkey/issues/2021	xbasel	Todo	GA
+Fix missing response when AUTH is errored inside a transaction	https://github.com/valkey-io/valkey/pull/2287		Done	
+[BUG] Breaking Change to error handling in MULTI blocks	https://github.com/valkey-io/valkey/issues/1629		Done	
+Introduce HASH items expiration	https://github.com/valkey-io/valkey/pull/2089	ranshid	Done	
+[NEW] Extend module-API with Authentication result	https://github.com/valkey-io/valkey/issues/2211	rjd15372	Done	rc2
+[NEW] Performance bottleneck in clusterNodeCleanupFailureReports under heavy failure load	https://github.com/valkey-io/valkey/issues/2139	sungming2	Done	
+Add CLUSTER FLUSHSLOT command	https://github.com/valkey-io/valkey/pull/1384		Done	
+Implement: CLUSTER REPLICATE NO ONE	https://github.com/valkey-io/valkey/pull/1674		Done	
+Reply Copy Avoidance	https://github.com/valkey-io/valkey/pull/1457		Done	
+[Client Introspection] Client Commands Extended Filtering	https://github.com/valkey-io/valkey/pull/1466	sarthakaggarwal97	Done	
+Add multi-database support to cluster mode	https://github.com/valkey-io/valkey/pull/1671		Done	
+On-demand database allocation instead of preallocation	https://github.com/valkey-io/valkey/pull/1609		Done	
+In LOLWUT's reply, change "Redis ver." to "Valkey ver."	https://github.com/valkey-io/valkey/pull/1559		Done	
+[NEW] Rolling downgrade, forward compatibility	https://github.com/valkey-io/valkey/issues/1108		In Progress	Optional
+Enhance ACL WHOAMI command to display active ACL rules for the current connection 	https://github.com/valkey-io/valkey/pull/1821		In Progress	Optional
+Adding support for sharing memory between the module and the engine	https://github.com/valkey-io/valkey/pull/1804		Done	
+Introduce MPTCP	https://github.com/valkey-io/valkey/pull/1811	zuiderkwast	Done	
+Introduce cluster-ignore-disk-write-errors to prevent the process from exiting when saving fails	https://github.com/valkey-io/valkey/pull/1032		In Progress	Optional
+Call makeObjectShared to normalize a shared object into a true shared object	https://github.com/valkey-io/valkey/pull/1566		Done	
+Add --sequential to valkey-benchmark (for populating entire keyspace)	https://github.com/valkey-io/valkey/pull/1839		Done	
+Rewrite the correct databases value when dbnum is clamped to 1 in cluster mode	https://github.com/valkey-io/valkey/pull/1856		Done	
+[BUG] We should not rewrite configuration values when we clamp them.	https://github.com/valkey-io/valkey/issues/1853		Done	
+reuse rdb file to restart AOF after primary-replica full sync	https://github.com/valkey-io/valkey/pull/1901		In Progress	GA
+Support field level expire/TTL for hash, set and sorted set	https://github.com/valkey-io/valkey/issues/640	ranshid	Done	
+Trigger manual failover on SIGTERM / shutdown to cluster primary	https://github.com/valkey-io/valkey/pull/1091		Done	
+Support BYPOLYGON option for GEOSEARCH	https://github.com/valkey-io/valkey/pull/1809	madolson	Done	
+Introduce atomic slot migration	https://github.com/valkey-io/valkey/pull/1949	enjoy-binbin	Done	rc1
+Improve clarity of errors for GEO commands when member does not exist	https://github.com/valkey-io/valkey/pull/1943		Done	
+Fix incorrect lag and entries-read value with tombstone	https://github.com/valkey-io/valkey/pull/685		In Progress	GA
+Disallowing Client Reply is On / Off / Skip when Client is Multi	https://github.com/valkey-io/valkey/pull/1966		Done	
+Support for RDB analysis reports	https://github.com/valkey-io/valkey/pull/1743		Done	
+Add support for automatic client authentication via TLS certificate fields	https://github.com/valkey-io/valkey/pull/1920		Done	
+Optimize string-to-integer performance using AVX512	https://github.com/valkey-io/valkey/pull/1944		Done	
+Introduce MPTCP for replica	https://github.com/valkey-io/valkey/pull/1961		Done	
+Add --hotkeys-count option for Valkey-cli	https://github.com/valkey-io/valkey/pull/1933		Done	
+Add DELIFEQ command	https://github.com/valkey-io/valkey/pull/1975		Done	
+Respect process umask when creating data files	https://github.com/valkey-io/valkey/pull/1725		Done	
+Implement rps control for benchmark using token bucket algorithm	https://github.com/valkey-io/valkey/pull/1761		Done	
+Start failover without waiting for the next cluster cron cycle	https://github.com/valkey-io/valkey/pull/2209		Done	
+New module API event for tracking authentication attempts	https://github.com/valkey-io/valkey/pull/2237		Done	rc2
+Save to Disk in Bio Thread and refactor readSyncBulkPayload	https://github.com/valkey-io/valkey/pull/1784		Done	
+Auto-failover on shutdown unified config	https://github.com/valkey-io/valkey/pull/2292		Done	
+Generate a new shard_id when the replica executes CLUSTER RESET SOFT	https://github.com/valkey-io/valkey/pull/2283		Done	
+The smaller config epoch primary will become the replica when two primaries in the same shard	https://github.com/valkey-io/valkey/pull/2279		Todo	GA
+Fix replica (the old primary) claims to sitll have slots after manual failover	https://github.com/valkey-io/valkey/pull/2301		Done	
+Apply fixed for CVE-2025-32023	https://github.com/valkey-io/valkey/pull/2314		Done	
+Add extensions supported to cluster link layer to propagate extension faster during handshake	https://github.com/valkey-io/valkey/pull/2310		Done	
+Fix module context object re-usage in scripting engines	https://github.com/valkey-io/valkey/pull/2358		Done	GA
+[NEW] Excessive connection attempts to failed nodes in clusterCron() cause CPU overhead	https://github.com/valkey-io/valkey/issues/2122	sarthakaggarwal97	Done	
+FUNCTION FLUSH re-create lua VM, fix flush not gc, fix flush async + load crash	https://github.com/valkey-io/valkey/pull/1826		In Progress	GA
+Limiting the new reconnections for failed nodes	https://github.com/valkey-io/valkey/pull/2154	sarthakaggarwal97	Done	
+Update clusterMoveNodeSlots to also move importing slots and migrating slots	https://github.com/valkey-io/valkey/pull/2370		Done	
+support negative filtering for client command filters	https://github.com/valkey-io/valkey/pull/2378		Done	
+Use last writer win approach for CLIENT LIST/KILL duplicate filters	https://github.com/valkey-io/valkey/pull/2362	hpatro	In Progress	GA
+blocking clients should return -MOVED and -REDIRECT correctly	https://github.com/valkey-io/valkey/pull/2329		In Progress	GA
+Defrag should only skip non-existent dbs, not empty dbs	https://github.com/valkey-io/valkey/pull/2379		Done	
+Configurable auth options for CLUSTER MIGRATE	https://github.com/valkey-io/valkey/issues/2392	murphyjacob4	Todo	Optional
+[NEW] Introduce lttng based tracing	https://github.com/valkey-io/valkey/pull/2070		Done	
+Rename trace bgsave type to rdb and aof	https://github.com/valkey-io/valkey/pull/2400		Done	
+[BUG] Copy avoidance: Inaccurate client memory tracking with embedded reply object pointers	https://github.com/valkey-io/valkey/issues/2396		Todo	GA
+[BUG] Support multi-db in CME	https://github.com/valkey-io/valkey-search/issues/204	yairgott	Todo	
+Kill the busy script during failover to avoid data inconsistency	https://github.com/valkey-io/valkey/pull/2157		Todo	Optional
+Do the failover immediately if the replica is the best ranked replica	https://github.com/valkey-io/valkey/pull/2227		Todo	Optional
+bump the RDB version	https://github.com/valkey-io/valkey/pull/2422		Done	
+Change the same shard failover assert to if condition to avoid crash	https://github.com/valkey-io/valkey/pull/2431		Done	Optional
+Add STALE command flag to SCRIPT-EXISTS, SCRIPT-SHOW and SCRIPT-FLUSH	https://github.com/valkey-io/valkey/pull/2419		Done	
+HFE Fix new test failures	https://github.com/valkey-io/valkey/issues/2435	ranshid	Done	
+[BLOG POST] Valkey support for hash fields expiration	https://github.com/valkey-io/valkey-io.github.io/issues/326	ranshid	In Progress	GA
+Prevent bad memory access when NOTOUCH client gets unblocked	https://github.com/valkey-io/valkey/pull/2347		Done	
+Valkey Fuzzer	https://github.com/valkey-io/valkey/pull/2340		Todo	Optional
+Adding support for sharing memory between the module and the engine	https://github.com/valkey-io/valkey/pull/2299		Done	rc2
+Fix primary replica chain cycle, always update sender_claimed_primary in advance	https://github.com/valkey-io/valkey/pull/2441		Todo	Optional
+Fix hashexpire test toggle active expire	https://github.com/valkey-io/valkey/pull/2447		Done	
+[BLOG POST] Valkey 9.0 GA	https://github.com/valkey-io/valkey-io.github.io/issues/312	stockholmux	Todo	GA
+Fix HGETEX to return array response when the hash object is empty	https://github.com/valkey-io/valkey/pull/2462	ranshid	Done	
+Reset cluster related stats in CONFIG RESETSTATS	https://github.com/valkey-io/valkey/pull/2458		Done	GA
+Fix out-of-bound memory access when num-fields is not provided	https://github.com/valkey-io/valkey/pull/2464	ranshid	Done	
+Fix pre-size hashtables per slot when reading RDB files	https://github.com/valkey-io/valkey/pull/2466		Done	GA
+HSETEX 'hset' notification should only be generated if not expired	https://github.com/valkey-io/valkey/pull/2475	ranshid	Done	
+Fix duplicate Acks for RDMA events and fix extremely large max latency for RDMA benchmark.	https://github.com/valkey-io/valkey/pull/2430		Done	
+Increment expired_fields stat when assigned TTL is in the past	https://github.com/valkey-io/valkey/pull/2474		Done	
+Optimize pipelining by parsing and prefetching multiple commands	https://github.com/valkey-io/valkey/pull/2092		Done	rc2
+[BLOG POST] Clustered Databases in Valkey 9	https://github.com/valkey-io/valkey-io.github.io/issues/334	stockholmux	In Progress	GA
+Consolidate slot migration logs by grouping consecutive slot migrations into a single log entry	https://github.com/valkey-io/valkey/pull/2481		Done	rc1
+CONFIG GET command return sorted output	https://github.com/valkey-io/valkey/pull/2493		Done	
+[NEW] Use atomic slot migration in valkey-cli	https://github.com/valkey-io/valkey/issues/2504	enjoy-binbin	Todo	GA
+fix hash ignore ttl management during active expiry	https://github.com/valkey-io/valkey/pull/2505	ranshid	Done	
+Skip failure reports for already failed nodes	https://github.com/valkey-io/valkey/pull/2434	sungming2	Done	
+Add documentation for Hash Fields Expiration	https://github.com/valkey-io/valkey-doc/pull/347		Done	rc2
+Module API: Add READONLY flag to ClientInfo.flags output structure	https://github.com/valkey-io/valkey/pull/2522	allenss-amazon	Done	
+Split SLOT_EXPORT_AUTHENTICATING into SEND and READ to avoid synchronous reading of auth response	https://github.com/valkey-io/valkey/pull/2494		Done	rc2
+Separate RDB snapshotting from atomic slot migration	https://github.com/valkey-io/valkey/pull/2533	enjoy-binbin	In Progress	rc2
+Do not migrate function in new atomic slot migration	https://github.com/valkey-io/valkey/pull/2547	enjoy-binbin	Done	
