@@ -1,36 +1,42 @@
 #!/usr/bin/env python3
 # github_weekly_trends.py
+#
 # Produces weekly/monthly CSVs for Grafana dashboards from a GitHub repo.
 # Outputs clean, unambiguous bucket labels:
 #  - weekly: Monday 00:00:00Z (YYYY-MM-DDT00:00:00Z)
 #  - monthly: 1st of month 00:00:00Z (YYYY-MM-01T00:00:00Z)
+#
+# New in this version:
+# - Multi-label support via --labels "label1,label2,Label With Spaces"
+#   -> emits label-<slug>_opened_weekly.csv and label-<slug>_closed_weekly.csv for each label.
+# - Backwards compatible: --enhancement-label still works if --labels is not provided.
 
 import os
 import sys
 import csv
 import time
-import math
 import argparse
-from collections import defaultdict, Counter
+from collections import defaultdict
 from datetime import datetime, timezone, date, timedelta
 import requests
+from typing import Optional, Tuple, Dict, Iterable
 
 # -----------------------------
 # HTTP helpers
 # -----------------------------
 
-def make_session(token: str | None):
+def make_session(token: Optional[str]) -> requests.Session:
     s = requests.Session()
     headers = {
         "Accept": "application/vnd.github+json",
-        "User-Agent": "github-weekly-trends/1.0",
+        "User-Agent": "github-weekly-trends/1.1",
     }
     if token:
         headers["Authorization"] = f"Bearer {token}"
     s.headers.update(headers)
     return s
 
-def get_json(session: requests.Session, url: str, params: dict | None = None, timeout: int = 30):
+def get_json(session: requests.Session, url: str, params: Optional[dict] = None, timeout: int = 30):
     r = session.get(url, params=params or {}, timeout=timeout)
     r.raise_for_status()
     return r.json(), r.links
@@ -41,7 +47,6 @@ def get_json(session: requests.Session, url: str, params: dict | None = None, ti
 
 def today_utc_date() -> date:
     return datetime.now(timezone.utc).date()
-
 
 def monday_bucket(dtime: datetime) -> date:
     """Return the Monday (as date) for the week containing dtime."""
@@ -61,7 +66,7 @@ def parse_iso_z(ts: str) -> datetime:
 # Writing CSVs (robust to date/datetime/str keys)
 # -----------------------------
 
-def write_csv(path: str, counter: dict):
+def write_csv(path: str, counter: Dict) -> None:
     rows = sorted(counter.items())
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -90,12 +95,12 @@ def write_csv(path: str, counter: dict):
 # Range & chunking
 # -----------------------------
 
-def compute_window(since_days: int) -> tuple[date, date]:
+def compute_window(since_days: int) -> Tuple[date, date]:
     end = today_utc_date()
     start = end - timedelta(days=since_days)
     return start, end
 
-def daterange_chunks(start: date, end: date, chunk_days: int):
+def daterange_chunks(start: date, end: date, chunk_days: int) -> Iterable[Tuple[str, str]]:
     """
     Yield [start, end] inclusive chunks as ISO date strings for GitHub search.
     """
@@ -110,7 +115,7 @@ def daterange_chunks(start: date, end: date, chunk_days: int):
 # Search builders
 # -----------------------------
 
-def build_query_pr(owner, repo, which, start_date, end_date):
+def build_query_pr(owner, repo, which, start_date, end_date) -> str:
     """
     which in {"opened","closed","merged"}
     """
@@ -124,7 +129,7 @@ def build_query_pr(owner, repo, which, start_date, end_date):
     else:
         raise ValueError("which must be opened|closed|merged")
 
-def build_query_issue(owner, repo, which, start_date, end_date):
+def build_query_issue(owner, repo, which, start_date, end_date) -> str:
     """
     which in {"opened","closed"}
     """
@@ -136,10 +141,10 @@ def build_query_issue(owner, repo, which, start_date, end_date):
     else:
         raise ValueError("which must be opened|closed")
 
-def build_query_labeled_issue(owner, repo, label, which, start_date, end_date):
+def build_query_labeled_issue(owner, repo, label, which, start_date, end_date) -> str:
     """
-    Label-filtered issues (e.g., enhancement).
-    label should be exact (e.g., 'enhancement' or 'type: enhancement').
+    Label-filtered issues (e.g., enhancement, Major decision pending).
+    Label text must match exactly as shown in GitHub.
     """
     base = f'repo:{owner}/{repo} is:issue label:"{label}"'
     if which == "opened":
@@ -153,7 +158,7 @@ def build_query_labeled_issue(owner, repo, label, which, start_date, end_date):
 # GitHub queries (search/issues, commits, releases)
 # -----------------------------
 
-def search_items(session, q: str, token: str | None, max_pages: int = 10, pause: float = 0.5):
+def search_items(session: requests.Session, q: str, token: Optional[str], max_pages: int = 10, pause: float = 0.5):
     """
     Use GitHub Search API (issues/PRs). Returns list of items.
     Honours 1000 results cap via max_pages (100 per page).
@@ -165,7 +170,6 @@ def search_items(session, q: str, token: str | None, max_pages: int = 10, pause:
         params["page"] = page
         r = session.get(url, params=params, timeout=30)
         if r.status_code == 422:
-            # Search window invalid (e.g., end < start) or bad query
             r.raise_for_status()
         r.raise_for_status()
         data = r.json()
@@ -176,7 +180,7 @@ def search_items(session, q: str, token: str | None, max_pages: int = 10, pause:
         time.sleep(pause)
     return items
 
-def list_commits(session, owner, repo, since_iso, until_iso):
+def list_commits(session: requests.Session, owner: str, repo: str, since_iso: str, until_iso: str):
     """
     List commits via REST (not search), paginated.
     since/until are ISO timestamps like 'YYYY-MM-DDT00:00:00Z'
@@ -196,7 +200,7 @@ def list_commits(session, owner, repo, since_iso, until_iso):
         time.sleep(0.3)
     return commits
 
-def list_releases(session, owner, repo, since_d: date, until_d: date):
+def list_releases(session: requests.Session, owner: str, repo: str, since_d: date, until_d: date):
     """
     List releases; bucket by month if within window.
     """
@@ -230,6 +234,17 @@ def list_releases(session, owner, repo, since_d: date, until_d: date):
     return out
 
 # -----------------------------
+# Utilities
+# -----------------------------
+
+def slugify_label(label: str) -> str:
+    """
+    Convert a label into a safe, readable filename slug:
+    "Major decision pending" -> "major-decision-pending"
+    """
+    return "".join(ch.lower() if ch.isalnum() else "-" for ch in label).strip("-")
+
+# -----------------------------
 # Main aggregation
 # -----------------------------
 
@@ -242,7 +257,14 @@ def main():
     ap.add_argument("--chunk-days", type=int, default=30, help="Search chunk size in days (default 30)")
     ap.add_argument("--max-pages", type=int, default=10, help="Max search pages (100 results each)")
     ap.add_argument("--pause", type=float, default=0.5, help="Pause between search pages (seconds)")
-    ap.add_argument("--enhancement-label", default="enhancement", help="Exact label text for enhancements")
+
+    # Back-compat: old single-label arg (used if --labels not provided)
+    ap.add_argument("--enhancement-label", default="enhancement",
+                    help="(Back-compat) Single label text to export if --labels is not set.")
+    # New: multiple labels (comma-separated exact label text as in GitHub)
+    ap.add_argument("--labels", default="",
+                    help="Comma-separated list of labels to export (exact label text). Example: \"enhancement,Major decision pending\"")
+
     args = ap.parse_args()
 
     token = os.getenv("GITHUB_TOKEN")
@@ -267,9 +289,8 @@ def main():
                     elif which == "closed":
                         ts = it.get("closed_at")
                     else:  # merged
-                        ts = it.get("pull_request", {}).get("merged_at") or it.get("closed_at")
-                        # For search/issues results, merged_at is top-level for PRs; fallback to closed_at if missing.
-                        ts = it.get("merged_at") if it.get("merged_at") else ts
+                        # merged_at can be on top-level or under pull_request
+                        ts = it.get("merged_at") or it.get("pull_request", {}).get("merged_at") or it.get("closed_at")
                     if not ts:
                         continue
                     dt = parse_iso_z(ts)
@@ -292,20 +313,31 @@ def main():
                     weekly[key] += 1
             write_csv(os.path.join(args.out_dir, f"issues_{which}_weekly.csv"), weekly)
 
-        # ----- Enhancements (label: enhancement): opened/closed (weekly) -----
-        for which in ("opened", "closed"):
-            weekly = defaultdict(int)
-            for s, e in daterange_chunks(start_d, end_d, args.chunk_days):
-                q = build_query_labeled_issue(args.owner, args.repo, args.enhancement_label, which, s, e)
-                items = search_items(session, q, token, max_pages=args.max_pages, pause=args.pause)
-                for it in items:
-                    ts = it.get("created_at") if which == "opened" else it.get("closed_at")
-                    if not ts:
-                        continue
-                    dt = parse_iso_z(ts)
-                    key = monday_bucket(dt)
-                    weekly[key] += 1
-            write_csv(os.path.join(args.out_dir, f"enhancements_{which}_weekly.csv"), weekly)
+        # ----- Label-specific issues (weekly for each label) -----
+        labels_arg = args.labels.strip()
+        labels = []
+        if labels_arg:
+            labels = [x.strip() for x in labels_arg.split(",") if x.strip()]
+        else:
+            # Back-compat path: just use the single enhancement label
+            labels = [args.enhancement_label]
+
+        for label in labels:
+            for which in ("opened", "closed"):
+                weekly = defaultdict(int)
+                for s, e in daterange_chunks(start_d, end_d, args.chunk_days):
+                    q = build_query_labeled_issue(args.owner, args.repo, label, which, s, e)
+                    items = search_items(session, q, token, max_pages=args.max_pages, pause=args.pause)
+                    for it in items:
+                        ts = it.get("created_at") if which == "opened" else it.get("closed_at")
+                        if not ts:
+                            continue
+                        dt = parse_iso_z(ts)
+                        key = monday_bucket(dt)
+                        weekly[key] += 1
+                # Write one CSV per label+which with clean Monday-UTC labels
+                fname = f"label-{slugify_label(label)}_{which}_weekly.csv"
+                write_csv(os.path.join(args.out_dir, fname), weekly)
 
         # ----- Commits + Contributors (weekly) -----
         commits = list_commits(session, args.owner, args.repo, since_iso, until_iso)
@@ -357,9 +389,9 @@ if __name__ == "__main__":
     try:
         main()
     except requests.HTTPError as e:
-            # Print useful context for GitHub API errors
-            print(f"HTTPError: {e} - Response text: {getattr(e.response, 'text', '')}", file=sys.stderr)
-            sys.exit(1)
+        # Print useful context for GitHub API errors
+        print(f"HTTPError: {e} - Response text: {getattr(e.response, 'text', '')}", file=sys.stderr)
+        sys.exit(1)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
